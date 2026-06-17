@@ -1,5 +1,9 @@
 # CRA / IEC 62443 Risk Workbench Community Edition
 
+<p align="center">
+  <img src="assets/cra-risk-workbench-logo.svg" width="120" alt="CRA Risk Workbench logo">
+</p>
+
 Static web application for preparing cybersecurity risk analyses for products, systems and networked components using the IEC 62443-3-2 workflow and a CRA-oriented product compliance evidence model.
 
 ## About
@@ -52,6 +56,21 @@ Open `index.html` in a browser. The application does not require a server, build
 - [ ] Audit Trail
 - [ ] Document Approval Workflow
 - [ ] Automated Documentation Generation
+
+## Reference Links
+
+The form structure and terminology were informed by the following public references:
+
+- [IEC 62443-3-2 - Security risk assessment for system design](https://webstore.iec.ch/en/publication/30727)
+- [Regulation (EU) 2024/2847 - Cyber Resilience Act](https://eur-lex.europa.eu/eli/reg/2024/2847/oj)
+- [European Commission - Cyber Resilience Act](https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act)
+- [CISA - Software Bill of Materials (SBOM)](https://www.cisa.gov/sbom)
+- [SPDX Software Bill of Materials](https://spdx.dev/)
+- [CycloneDX SBOM Standard](https://cyclonedx.org/)
+- [CVE Program](https://www.cve.org/)
+- [NIST National Vulnerability Database](https://nvd.nist.gov/)
+- [FIRST Common Vulnerability Scoring System (CVSS)](https://www.first.org/cvss/)
+- [NIST Secure Software Development Framework (SSDF)](https://csrc.nist.gov/Projects/ssdf)
 
 ## Scope Note
 
