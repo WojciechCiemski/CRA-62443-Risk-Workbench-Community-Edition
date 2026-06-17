@@ -10,6 +10,10 @@ const UI_TRANSLATIONS = {
   "IEC 62443-3-2 + CRA": "IEC 62443-3-2 + CRA",
   "Sekcje aplikacji": "Application sections",
   "Wybór języka": "Language selector",
+  "Dane projektu": "Project data",
+  "Usuń wszystkie dane": "Delete all data",
+  "Usuń wszystkie dane tej analizy z przeglądarki": "Delete all data for this analysis from the browser",
+  "Dane są zapisywane tylko lokalnie w tej przeglądarce.": "Data is stored only locally in this browser.",
   "Projekt i SUC": "Project and SUC",
   "Strefy i conduits": "Zones and conduits",
   "Scenariusze ryzyka": "Risk scenarios",
@@ -247,7 +251,9 @@ const UI_TRANSLATIONS = {
   "notatka / dowód": "note / evidence"
   ,
   "Utworzyć nowy pusty projekt? Bieżący stan w przeglądarce zostanie zastąpiony.": "Create a new empty project? The current browser state will be replaced.",
+  "Usunąć wszystkie dane tej analizy z tej przeglądarki? Tej operacji nie można cofnąć.": "Delete all data for this analysis from this browser? This operation cannot be undone.",
   "Utworzono nowy projekt.": "Created a new project.",
+  "Usunięto wszystkie dane lokalne.": "All local data deleted.",
   "Zaimportowano dane projektu.": "Project data imported.",
   "Nie udało się zaimportować JSON.": "Could not import JSON.",
   "Dodano strefę.": "Zone added.",
@@ -964,11 +970,15 @@ function bindTopActions() {
   document.getElementById("newProjectButton").addEventListener("click", () => {
     const confirmed = window.confirm(trText("Utworzyć nowy pusty projekt? Bieżący stan w przeglądarce zostanie zastąpiony."));
     if (!confirmed) return;
-    state = createDefaultState();
-    saveState();
-    renderAll();
-    activateView("project");
+    resetProjectState({ persist: true });
     showToast("Utworzono nowy projekt.");
+  });
+
+  document.getElementById("clearLocalDataButton").addEventListener("click", () => {
+    const confirmed = window.confirm(trText("Usunąć wszystkie dane tej analizy z tej przeglądarki? Tej operacji nie można cofnąć."));
+    if (!confirmed) return;
+    resetProjectState({ persist: false });
+    showToast("Usunięto wszystkie dane lokalne.");
   });
 
   document.getElementById("importJsonButton").addEventListener("click", () => {
@@ -999,6 +1009,17 @@ function bindTopActions() {
   document.getElementById("exportJsonButton").addEventListener("click", exportJson);
   document.getElementById("exportDocButton").addEventListener("click", exportDoc);
   document.getElementById("reportExportDocButton").addEventListener("click", exportDoc);
+}
+
+function resetProjectState({ persist }) {
+  state = createDefaultState();
+  if (persist) {
+    saveState();
+  } else {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+  renderAll();
+  activateView("project");
 }
 
 function bindForms() {
