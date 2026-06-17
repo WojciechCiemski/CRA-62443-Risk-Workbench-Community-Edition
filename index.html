@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IEC 62443-3-2 - analiza ryzyka</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">62443</div>
+          <div>
+            <h1>Analiza ryzyka</h1>
+            <p>IEC 62443-3-2</p>
+          </div>
+        </div>
+
+        <nav class="step-nav" aria-label="Sekcje aplikacji">
+          <button class="nav-button active" type="button" data-view="project">Projekt i SUC</button>
+          <button class="nav-button" type="button" data-view="zones">Strefy i conduits</button>
+          <button class="nav-button" type="button" data-view="scenarios">Scenariusze ryzyka</button>
+          <button class="nav-button" type="button" data-view="cra-components">Komponenty CRA</button>
+          <button class="nav-button" type="button" data-view="cra-requirements">CRA Annex I</button>
+          <button class="nav-button" type="button" data-view="sbom">SBOM</button>
+          <button class="nav-button" type="button" data-view="vulnerabilities">Podatności</button>
+          <button class="nav-button" type="button" data-view="traceability">Dowody</button>
+          <button class="nav-button" type="button" data-view="requirements">Wymagania</button>
+          <button class="nav-button" type="button" data-view="approval">Zatwierdzenie</button>
+          <button class="nav-button" type="button" data-view="report">Raport</button>
+        </nav>
+
+        <div class="status-box">
+          <span class="status-label">Stan projektu</span>
+          <strong id="completionPercent">0%</strong>
+          <div class="progress-track" aria-hidden="true">
+            <div id="completionBar" class="progress-bar"></div>
+          </div>
+          <p id="saveStatus">Nie zapisano zmian.</p>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Narzędzie robocze</span>
+            <h2 id="viewTitle">Projekt i SUC</h2>
+            <p id="viewDescription">Zdefiniuj system podlegający rozważaniu, granice, punkty dostępu i kryteria ryzyka.</p>
+          </div>
+          <div class="top-actions">
+            <div class="language-switch" aria-label="Wybór języka">
+              <button class="language-button active" type="button" data-lang-switch="pl">PL</button>
+              <button class="language-button" type="button" data-lang-switch="en">EN</button>
+            </div>
+            <button class="ghost-button" type="button" id="newProjectButton" title="Wyczyść bieżący projekt">Nowy projekt</button>
+            <button class="ghost-button" type="button" id="importJsonButton" title="Wczytaj wcześniej zapisany plik JSON">Import JSON</button>
+            <button class="ghost-button" type="button" id="exportJsonButton" title="Zapisz kopię danych projektu">Eksport JSON</button>
+            <button class="primary-button" type="button" id="exportDocButton" title="Wygeneruj raport Word w formacie DOC">Eksport DOC</button>
+            <input id="importJsonInput" type="file" accept="application/json,.json" hidden>
+          </div>
+        </header>
+
+        <section class="view active" id="view-project" data-title="Projekt i SUC" data-description="Zdefiniuj system podlegający rozważaniu, granice, punkty dostępu i kryteria ryzyka.">
+          <div class="section-heading">
+            <div>
+              <h3>ZCR 1-2: identyfikacja SUC i ryzyko początkowe</h3>
+              <p>Wypełnij podstawy projektu, opis systemu, zakres oraz bazowe kryteria macierzy ryzyka.</p>
+            </div>
+            <span class="pill" id="projectUpdatedAt">Autosave aktywny</span>
+          </div>
+
+          <div class="form-grid two">
+            <label class="field">
+              <span>Nazwa analizy</span>
+              <input type="text" data-bind="meta.title" placeholder="np. Analiza ryzyka systemu TCMS">
+            </label>
+            <label class="field">
+              <span>Organizacja / projekt</span>
+              <input type="text" data-bind="meta.organization" placeholder="np. Stadler">
+            </label>
+            <label class="field">
+              <span>Właściciel aktywów</span>
+              <input type="text" data-bind="meta.assetOwner" placeholder="imię, zespół lub rola">
+            </label>
+            <label class="field">
+              <span>Wersja dokumentu</span>
+              <input type="text" data-bind="meta.version" placeholder="np. 0.1">
+            </label>
+            <label class="field">
+              <span>Data analizy</span>
+              <input type="date" data-bind="meta.analysisDate">
+            </label>
+            <label class="field">
+              <span>Próg ryzyka tolerowanego</span>
+              <input type="number" min="1" max="25" data-bind="method.tolerableRisk">
+            </label>
+          </div>
+
+          <div class="form-grid">
+            <label class="field">
+              <span>Opis SUC</span>
+              <textarea data-bind="suc.description" rows="4" placeholder="Opisz system podlegający rozważaniu, funkcje, użytkowników i zależności operacyjne."></textarea>
+            </label>
+            <label class="field">
+              <span>Granica SUC</span>
+              <textarea data-bind="suc.perimeter" rows="4" placeholder="Opisz granice techniczne i organizacyjne, interfejsy oraz elementy poza zakresem."></textarea>
+            </label>
+            <label class="field">
+              <span>Punkty dostępu</span>
+              <textarea data-bind="suc.accessPoints" rows="4" placeholder="Wymień porty serwisowe, dostęp zdalny, sieci zewnętrzne, transfer plików, media wymienne."></textarea>
+            </label>
+            <label class="field">
+              <span>Ryzyko początkowe i uzasadnienie</span>
+              <textarea data-bind="suc.initialRiskSummary" rows="4" placeholder="Podsumuj wstępne ryzyka przed szczegółową analizą stref i scenariuszy."></textarea>
+            </label>
+          </div>
+
+          <div class="risk-method">
+            <div class="section-heading compact">
+              <div>
+                <h3>Macierz ryzyka</h3>
+                <p>Ocena = wpływ x prawdopodobieństwo. Progi możesz dopasować przez tolerowane ryzyko.</p>
+              </div>
+            </div>
+            <div id="riskMatrix" class="risk-matrix" aria-label="Macierz ryzyka 5 na 5"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-zones" data-title="Strefy i conduits" data-description="Podziel SUC na strefy i połączenia, rozdziel aktywa biznesowe, IACS, safety, bezprzewodowe, tymczasowe i zewnętrzne.">
+          <div class="section-heading">
+            <div>
+              <h3>ZCR 3: podział na strefy i conduits</h3>
+              <p>Najpierw dodaj strefy, potem powiąż je przez conduits. Każdy wpis trafi do eksportowanego raportu.</p>
+            </div>
+          </div>
+
+          <form class="entry-form" id="zoneForm">
+            <div class="form-grid three">
+              <label class="field">
+                <span>Nazwa strefy</span>
+                <input name="name" type="text" required placeholder="np. Zone-Cab-Control">
+              </label>
+              <label class="field">
+                <span>Typ strefy</span>
+                <select name="type">
+                  <option value="IACS">IACS</option>
+                  <option value="Business">Business / IT</option>
+                  <option value="Safety">Safety-related</option>
+                  <option value="Wireless">Wireless</option>
+                  <option value="External">External network</option>
+                  <option value="Temporary">Temporary devices</option>
+                  <option value="Other">Inna</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>SL-T ogólny</span>
+                <select name="slT">
+                  <option value="0">0 - nieokreślony</option>
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-grid two">
+              <label class="field">
+                <span>Aktywa</span>
+                <textarea name="assets" rows="3" placeholder="Sterowniki, HMI, stacje inżynierskie, serwery, urządzenia sieciowe."></textarea>
+              </label>
+              <label class="field">
+                <span>Granice i założenia separacji</span>
+                <textarea name="boundary" rows="3" placeholder="Opis zaufania, segmentacji, ograniczeń oraz wyjątków."></textarea>
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Dodaj strefę</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Strefy</h3>
+            <span id="zoneCount" class="pill">0</span>
+          </div>
+          <div id="zonesList" class="item-list"></div>
+
+          <form class="entry-form" id="conduitForm">
+            <div class="form-grid three">
+              <label class="field">
+                <span>Nazwa conduit</span>
+                <input name="name" type="text" required placeholder="np. Remote-service-conduit">
+              </label>
+              <label class="field">
+                <span>Ze strefy</span>
+                <select name="fromZone" id="fromZoneSelect"></select>
+              </label>
+              <label class="field">
+                <span>Do strefy</span>
+                <select name="toZone" id="toZoneSelect"></select>
+              </label>
+            </div>
+            <div class="form-grid two">
+              <label class="field">
+                <span>Protokoły / przepływy</span>
+                <textarea name="protocols" rows="3" placeholder="np. OPC UA, SSH, HTTPS, diagnostyka producenta, transfer plików."></textarea>
+              </label>
+              <label class="field">
+                <span>Środki ochronne i ograniczenia</span>
+                <textarea name="controls" rows="3" placeholder="np. firewall, jump host, MFA, allowlist, monitoring, procedury serwisowe."></textarea>
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Dodaj conduit</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Conduits</h3>
+            <span id="conduitCount" class="pill">0</span>
+          </div>
+          <div id="conduitsList" class="item-list"></div>
+        </section>
+
+        <section class="view" id="view-scenarios" data-title="Scenariusze ryzyka" data-description="Zidentyfikuj zagrożenia, podatności, wpływ, prawdopodobieństwo, SL-T, istniejące zabezpieczenia i ryzyko rezydualne.">
+          <div class="section-heading">
+            <div>
+              <h3>ZCR 4-5: szczegółowa ocena ryzyka</h3>
+              <p>Każdy scenariusz wylicza ryzyko przed i po uwzględnieniu zabezpieczeń. Przekroczenia progu są oznaczane automatycznie.</p>
+            </div>
+          </div>
+
+          <form class="entry-form" id="scenarioForm">
+            <div class="form-grid three">
+              <label class="field">
+                <span>Obszar</span>
+                <select name="target" id="scenarioTargetSelect"></select>
+              </label>
+              <label class="field">
+                <span>Zagrożenie</span>
+                <input name="threat" type="text" required placeholder="np. nieautoryzowany dostęp zdalny">
+              </label>
+              <label class="field">
+                <span>SL-T</span>
+                <select name="slT">
+                  <option value="0">0 - nieokreślony</option>
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-grid two">
+              <label class="field">
+                <span>Podatność</span>
+                <textarea name="vulnerability" rows="3" placeholder="Słabość techniczna, proceduralna lub organizacyjna."></textarea>
+              </label>
+              <label class="field">
+                <span>Konsekwencja</span>
+                <textarea name="consequence" rows="3" placeholder="Wpływ na bezpieczeństwo, dostępność, integralność, operacje, zgodność."></textarea>
+              </label>
+            </div>
+            <div class="rating-row">
+              <label class="field">
+                <span>Wpływ przed zabezp.</span>
+                <input name="impact" type="number" min="1" max="5" value="3">
+              </label>
+              <label class="field">
+                <span>Prawdop. przed zabezp.</span>
+                <input name="likelihood" type="number" min="1" max="5" value="3">
+              </label>
+              <label class="field">
+                <span>Wpływ po zabezp.</span>
+                <input name="residualImpact" type="number" min="1" max="5" value="2">
+              </label>
+              <label class="field">
+                <span>Prawdop. po zabezp.</span>
+                <input name="residualLikelihood" type="number" min="1" max="5" value="2">
+              </label>
+            </div>
+            <div class="form-grid two">
+              <label class="field">
+                <span>Istniejące zabezpieczenia</span>
+                <textarea name="existingControls" rows="3" placeholder="Zabezpieczenia już wdrożone lub zakontraktowane."></textarea>
+              </label>
+              <label class="field">
+                <span>Dodatkowe środki / wymagania</span>
+                <textarea name="additionalControls" rows="3" placeholder="Działania potrzebne, gdy ryzyko przekracza próg tolerowany."></textarea>
+              </label>
+            </div>
+            <div class="form-grid three">
+              <label class="field">
+                <span>Właściciel działania</span>
+                <input name="owner" type="text" placeholder="rola lub osoba">
+              </label>
+              <label class="field">
+                <span>Termin</span>
+                <input name="dueDate" type="date">
+              </label>
+              <label class="field">
+                <span>Decyzja</span>
+                <select name="decision">
+                  <option value="Mitigate">Mitygować</option>
+                  <option value="Accept">Akceptować</option>
+                  <option value="Transfer">Transferować</option>
+                  <option value="Avoid">Unikać</option>
+                </select>
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Dodaj scenariusz</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Rejestr scenariuszy</h3>
+            <span id="scenarioCount" class="pill">0</span>
+          </div>
+          <div id="scenariosList" class="scenario-list"></div>
+        </section>
+
+        <section class="view" id="view-cra-components" data-title="Komponenty CRA" data-description="Sklasyfikuj komponenty TCMS/PIS jako produkty z elementami cyfrowymi, określ rolę operatora, kategorię CRA, support period i procedurę oceny zgodności.">
+          <div class="section-heading">
+            <div>
+              <h3>CRA: klasyfikacja komponentów TCMS/PIS</h3>
+              <p>Rejestr obejmuje komponenty sprzętowe, software, firmware i usługi remote data processing związane z produktem.</p>
+            </div>
+          </div>
+
+          <form class="entry-form" id="componentForm">
+            <div class="form-grid four">
+              <label class="field">
+                <span>Nazwa komponentu</span>
+                <input name="name" type="text" required placeholder="np. PIS Controller, TCMS Gateway">
+              </label>
+              <label class="field">
+                <span>Obszar pojazdu</span>
+                <select name="systemArea">
+                  <option value="TCMS">TCMS</option>
+                  <option value="PIS">Informacja pasażerska</option>
+                  <option value="Network">Sieć pokładowa</option>
+                  <option value="Remote">Remote service / train-to-ground</option>
+                  <option value="Maintenance">Utrzymanie / diagnostyka</option>
+                  <option value="Passenger">Passenger Wi-Fi / usługi pasażerskie</option>
+                  <option value="Other">Inny</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Typ</span>
+                <select name="componentType">
+                  <option value="Hardware">Hardware</option>
+                  <option value="Firmware">Firmware</option>
+                  <option value="Software">Software</option>
+                  <option value="Network device">Urządzenie sieciowe</option>
+                  <option value="Remote processing">Remote data processing</option>
+                  <option value="Service tool">Narzędzie serwisowe</option>
+                  <option value="Other">Inny</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Wersja / wariant</span>
+                <input name="version" type="text" placeholder="wersja HW/SW/FW">
+              </label>
+            </div>
+            <div class="form-grid four">
+              <label class="field">
+                <span>Dostawca / producent</span>
+                <input name="supplier" type="text" placeholder="nazwa dostawcy">
+              </label>
+              <label class="field">
+                <span>Rola w CRA</span>
+                <select name="marketRole">
+                  <option value="Manufacturer">Manufacturer</option>
+                  <option value="Importer">Importer</option>
+                  <option value="Distributor">Distributor</option>
+                  <option value="Integrator">Integrator / system designer</option>
+                  <option value="Asset owner">Asset owner</option>
+                  <option value="To be assessed">Do ustalenia</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Status zakresu CRA</span>
+                <select name="craScope">
+                  <option value="In scope">W zakresie</option>
+                  <option value="Out of scope">Poza zakresem</option>
+                  <option value="Needs legal assessment">Wymaga oceny prawnej</option>
+                  <option value="Not placed separately">Nie wprowadzany osobno</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Support period do</span>
+                <input name="supportEnd" type="month">
+              </label>
+            </div>
+            <div class="form-grid three">
+              <label class="field">
+                <span>Kategoria CRA</span>
+                <select name="craCategory">
+                  <option value="Default">Default</option>
+                  <option value="Important Class I">Important Class I</option>
+                  <option value="Important Class II">Important Class II</option>
+                  <option value="Critical">Critical</option>
+                  <option value="To be assessed">Do ustalenia</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Ocena zgodności</span>
+                <select name="conformity">
+                  <option value="Self-assessment">Self-assessment</option>
+                  <option value="Harmonised standards required">Normy zharmonizowane wymagane</option>
+                  <option value="Notified body likely">Prawdopodobnie notified body</option>
+                  <option value="Notified body mandatory">Notified body wymagany</option>
+                  <option value="To be assessed">Do ustalenia</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Kontakt bezpieczeństwa</span>
+                <input name="securityContact" type="text" placeholder="email / rola">
+              </label>
+            </div>
+            <div class="form-grid three">
+              <label class="field">
+                <span>Zastosowanie i funkcje</span>
+                <textarea name="intendedUse" rows="3" placeholder="Funkcja w pojeździe, tryby pracy, przewidywane użycie."></textarea>
+              </label>
+              <label class="field">
+                <span>Interfejsy i połączenia</span>
+                <textarea name="interfaces" rows="3" placeholder="Ethernet, MVB/WTB, CAN, Wi-Fi, LTE/5G, USB, port diagnostyczny, API."></textarea>
+              </label>
+              <label class="field">
+                <span>Uzasadnienie klasyfikacji</span>
+                <textarea name="classificationRationale" rows="3" placeholder="Dlaczego komponent jest albo nie jest w zakresie CRA, kategoria i procedura oceny."></textarea>
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Dodaj komponent</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Rejestr komponentów</h3>
+            <span id="componentCount" class="pill">0</span>
+          </div>
+          <div id="componentsList" class="item-list"></div>
+        </section>
+
+        <section class="view" id="view-cra-requirements" data-title="CRA Annex I" data-description="Zmapuj wymagania CRA Annex I na komponenty, ryzyka, środki techniczne i dowody zgodności.">
+          <div class="section-heading">
+            <div>
+              <h3>CRA: wymagania, dowody i instrukcje użytkownika</h3>
+              <p>Macierz jest roboczą, sparafrazowaną listą kontroli pod CRA: właściwości produktu oraz obsługa podatności w okresie wsparcia.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <label class="field">
+              <span>Normy i specyfikacje użyte jako dowód</span>
+              <textarea data-bind="cra.standardsApplied" rows="5" placeholder="np. IEC 62443-4-1, IEC 62443-4-2, IEC 62443-3-3, EN 50701, EN 50159, normy zharmonizowane CRA gdy dostępne."></textarea>
+            </label>
+            <label class="field">
+              <span>Instrukcje bezpiecznej instalacji i eksploatacji</span>
+              <textarea data-bind="cra.secureUseInstructions" rows="5" placeholder="Wymagania dla integratora/operatora: konfiguracja, konta, aktualizacje, logi, backup, remote access, wyłączenia funkcji."></textarea>
+            </label>
+            <label class="field">
+              <span>Plan obsługi podatności i aktualizacji</span>
+              <textarea data-bind="cra.vulnerabilityPlan" rows="5" placeholder="Kanał zgłoszeń, triage, SLA, publikacja advisory, poprawki, backporty, komunikacja z klientami."></textarea>
+            </label>
+            <label class="field">
+              <span>Notatki do EU Declaration of Conformity / CE</span>
+              <textarea data-bind="cra.declarationNotes" rows="5" placeholder="Zakres deklaracji, warianty produktu, wyłączenia, dokumenty techniczne, status notified body."></textarea>
+            </label>
+          </div>
+
+          <div class="list-header">
+            <h3>Macierz wymagań CRA</h3>
+            <span id="craRequirementCount" class="pill">0/0</span>
+          </div>
+          <div id="craRequirementsList" class="checklist"></div>
+        </section>
+
+        <section class="view" id="view-sbom" data-title="SBOM" data-description="Zbierz komponenty software, firmware, biblioteki open-source i third-party wraz z wersją, licencją, CVE i statusem aktualizacji.">
+          <div class="section-heading">
+            <div>
+              <h3>CRA: SBOM i komponenty third-party</h3>
+              <p>Rejestr można prowadzić per produkt, firmware, aplikację PIS, gateway, router lub narzędzie serwisowe.</p>
+            </div>
+          </div>
+
+          <form class="entry-form" id="sbomForm">
+            <div class="form-grid four">
+              <label class="field">
+                <span>Komponent produktu</span>
+                <select name="componentId" id="sbomComponentSelect"></select>
+              </label>
+              <label class="field">
+                <span>Nazwa składnika</span>
+                <input name="name" type="text" required placeholder="np. OpenSSL, Linux kernel, Qt">
+              </label>
+              <label class="field">
+                <span>Wersja</span>
+                <input name="version" type="text" placeholder="np. 3.0.13">
+              </label>
+              <label class="field">
+                <span>Dostawca / maintainer</span>
+                <input name="supplier" type="text">
+              </label>
+            </div>
+            <div class="form-grid four">
+              <label class="field">
+                <span>Licencja</span>
+                <input name="license" type="text" placeholder="np. Apache-2.0, GPL-2.0">
+              </label>
+              <label class="field">
+                <span>Źródło</span>
+                <input name="source" type="text" placeholder="repo, package manager, dostawca">
+              </label>
+              <label class="field">
+                <span>Status CVE</span>
+                <select name="cveStatus">
+                  <option value="Not checked">Nie sprawdzono</option>
+                  <option value="No known CVE">Brak znanych CVE</option>
+                  <option value="Known CVE accepted">CVE zaakceptowane</option>
+                  <option value="Known CVE mitigated">CVE zmitygowane</option>
+                  <option value="Patch required">Wymaga poprawki</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Status aktualizacji</span>
+                <select name="updateStatus">
+                  <option value="Current">Aktualny</option>
+                  <option value="Update planned">Aktualizacja planowana</option>
+                  <option value="Pinned">Wersja zamrożona</option>
+                  <option value="End of support">Koniec wsparcia</option>
+                </select>
+              </label>
+            </div>
+            <label class="field">
+              <span>Notatki / uzasadnienie</span>
+              <textarea name="notes" rows="3" placeholder="CVE, kompensacje, powód zamrożenia wersji, ograniczenia środowiska kolejowego."></textarea>
+            </label>
+            <button class="primary-button" type="submit">Dodaj składnik SBOM</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Rejestr SBOM</h3>
+            <span id="sbomCount" class="pill">0</span>
+          </div>
+          <div id="sbomList" class="item-list"></div>
+        </section>
+
+        <section class="view" id="view-vulnerabilities" data-title="Podatności" data-description="Prowadź rejestr podatności i incydentów pod CRA z terminami 24h/72h, statusem poprawki i komunikacją.">
+          <div class="section-heading">
+            <div>
+              <h3>CRA: podatności, incydenty i raportowanie</h3>
+              <p>Rejestr pomaga kontrolować aktywnie wykorzystywane podatności, poważne incydenty oraz obowiązki raportowe.</p>
+            </div>
+          </div>
+
+          <form class="entry-form" id="vulnerabilityForm">
+            <div class="form-grid four">
+              <label class="field">
+                <span>Komponent</span>
+                <select name="componentId" id="vulnerabilityComponentSelect"></select>
+              </label>
+              <label class="field">
+                <span>Typ wpisu</span>
+                <select name="entryType">
+                  <option value="Vulnerability">Podatność</option>
+                  <option value="Severe incident">Poważny incydent</option>
+                  <option value="Near miss">Near miss</option>
+                  <option value="Advisory">Advisory</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>ID / źródło</span>
+                <input name="reference" type="text" placeholder="CVE, advisory, ticket">
+              </label>
+              <label class="field">
+                <span>Severity</span>
+                <select name="severity">
+                  <option value="Low">Low</option>
+                  <option value="Medium">Medium</option>
+                  <option value="High">High</option>
+                  <option value="Critical">Critical</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-grid four">
+              <label class="field">
+                <span>Aktywnie wykorzystywana</span>
+                <select name="activelyExploited">
+                  <option value="No">Nie</option>
+                  <option value="Yes">Tak</option>
+                  <option value="Unknown">Nie wiadomo</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Data wykrycia</span>
+                <input name="discoveredAt" type="datetime-local">
+              </label>
+              <label class="field">
+                <span>Status poprawki</span>
+                <select name="patchStatus">
+                  <option value="Triage">Triage</option>
+                  <option value="Patch planned">Poprawka planowana</option>
+                  <option value="Patch available">Poprawka dostępna</option>
+                  <option value="Mitigated">Zmitygowane</option>
+                  <option value="Accepted">Zaakceptowane</option>
+                  <option value="Closed">Zamknięte</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Status raportowania</span>
+                <select name="reportingStatus">
+                  <option value="Not reportable">Nie podlega</option>
+                  <option value="Assess reportability">Ocenić raportowalność</option>
+                  <option value="24h early warning due">24h early warning</option>
+                  <option value="72h notification due">72h notification</option>
+                  <option value="Final report due">Final report</option>
+                  <option value="Reported">Zgłoszone</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-grid two">
+              <label class="field">
+                <span>Opis wpływu</span>
+                <textarea name="impact" rows="3" placeholder="Wpływ na produkt, pojazd, operatora, pasażerów, dostępność, integralność lub poufność."></textarea>
+              </label>
+              <label class="field">
+                <span>Mitigacja / komunikacja</span>
+                <textarea name="mitigation" rows="3" placeholder="Działania, obejścia, poprawka, advisory, komunikacja z klientem, CSIRT/ENISA."></textarea>
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Dodaj wpis</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Rejestr podatności i incydentów</h3>
+            <span id="vulnerabilityCount" class="pill">0</span>
+          </div>
+          <div id="vulnerabilitiesList" class="item-list"></div>
+        </section>
+
+        <section class="view" id="view-traceability" data-title="Dowody" data-description="Połącz ryzyka, komponenty, wymagania CRA/62443, środki techniczne, testy i dowody do pakietu audytowego.">
+          <div class="section-heading">
+            <div>
+              <h3>Traceability: ryzyko → wymaganie → kontrola → test → dowód</h3>
+              <p>Ten rejestr jest najważniejszy przy przeglądzie technicznym, audycie dostawcy albo przygotowaniu technical documentation.</p>
+            </div>
+          </div>
+
+          <form class="entry-form" id="traceabilityForm">
+            <div class="form-grid three">
+              <label class="field">
+                <span>Scenariusz ryzyka</span>
+                <select name="scenarioId" id="traceScenarioSelect"></select>
+              </label>
+              <label class="field">
+                <span>Komponent</span>
+                <select name="componentId" id="traceComponentSelect"></select>
+              </label>
+              <label class="field">
+                <span>Wymaganie</span>
+                <select name="requirementCode" id="traceRequirementSelect"></select>
+              </label>
+            </div>
+            <div class="form-grid two">
+              <label class="field">
+                <span>Kontrola / wymaganie projektowe</span>
+                <textarea name="control" rows="3" placeholder="Środek techniczny lub procesowy, który realizuje wymaganie."></textarea>
+              </label>
+              <label class="field">
+                <span>Test / weryfikacja</span>
+                <textarea name="verification" rows="3" placeholder="Analiza, test penetracyjny, test konfiguracji, review, skan CVE, test aktualizacji."></textarea>
+              </label>
+            </div>
+            <div class="form-grid three">
+              <label class="field">
+                <span>Wynik</span>
+                <select name="result">
+                  <option value="Planned">Planowane</option>
+                  <option value="Passed">Passed</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Accepted with deviation">Akceptacja z odstępstwem</option>
+                  <option value="Not applicable">Nie dotyczy</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Właściciel</span>
+                <input name="owner" type="text" placeholder="rola / osoba">
+              </label>
+              <label class="field">
+                <span>Dowód / referencja</span>
+                <input name="evidence" type="text" placeholder="raport, ticket, commit, konfiguracja, procedura">
+              </label>
+            </div>
+            <button class="primary-button" type="submit">Dodaj dowód</button>
+          </form>
+
+          <div class="list-header">
+            <h3>Rejestr dowodów</h3>
+            <span id="traceabilityCount" class="pill">0</span>
+          </div>
+          <div id="traceabilityList" class="item-list"></div>
+        </section>
+
+        <section class="view" id="view-requirements" data-title="Wymagania" data-description="Udokumentuj wymagania cyberbezpieczeństwa, założenia, polityki, tolerancję ryzyka i wymagania regulacyjne.">
+          <div class="section-heading">
+            <div>
+              <h3>ZCR 6: wymagania, założenia i ograniczenia</h3>
+              <p>Ta sekcja składa raport w spójną specyfikację wymagań cyberbezpieczeństwa dla projektu.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <label class="field">
+              <span>Specyfikacja wymagań cyberbezpieczeństwa</span>
+              <textarea data-bind="docs.securityRequirements" rows="6" placeholder="Wymagania wynikające z ryzyka, SL-T, polityk, architektury i kontraktu."></textarea>
+            </label>
+            <label class="field">
+              <span>Rysunki / odniesienia do stref i conduits</span>
+              <textarea data-bind="docs.drawings" rows="6" placeholder="Nazwy diagramów, linki, numery dokumentów, wersje."></textarea>
+            </label>
+            <label class="field">
+              <span>Charakterystyka stref i conduits</span>
+              <textarea data-bind="docs.characteristics" rows="6" placeholder="Zaufanie, krytyczność, poziomy SL-T, aktywa, przepływy, założenia separacji."></textarea>
+            </label>
+            <label class="field">
+              <span>Założenia środowiska operacyjnego</span>
+              <textarea data-bind="docs.operatingAssumptions" rows="6" placeholder="Założenia dotyczące eksploatacji, utrzymania, personelu, dostawców i fizycznego środowiska pracy."></textarea>
+            </label>
+            <label class="field">
+              <span>Środowisko zagrożeń</span>
+              <textarea data-bind="docs.threatEnvironment" rows="6" placeholder="Profil atakujących, dostępne wektory, ekspozycja zewnętrzna, historia incydentów."></textarea>
+            </label>
+            <label class="field">
+              <span>Polityki organizacyjne</span>
+              <textarea data-bind="docs.policies" rows="6" placeholder="Polityki dostępu, zdalnego serwisu, haseł, kopii zapasowych, patchowania, logowania."></textarea>
+            </label>
+            <label class="field">
+              <span>Tolerowane ryzyko</span>
+              <textarea data-bind="docs.tolerableRisk" rows="6" placeholder="Kryteria akceptacji, macierz, właściciel decyzji, wyjątki i eskalacja."></textarea>
+            </label>
+            <label class="field">
+              <span>Wymagania regulacyjne i kontraktowe</span>
+              <textarea data-bind="docs.regulatory" rows="6" placeholder="Normy, przepisy, wymagania klienta, wymagania kolejowe lub sektorowe."></textarea>
+            </label>
+          </div>
+
+          <div class="list-header">
+            <h3>Kontrola kompletności ZCR</h3>
+            <span id="checklistCount" class="pill">0/0</span>
+          </div>
+          <div id="checklistList" class="checklist"></div>
+        </section>
+
+        <section class="view" id="view-approval" data-title="Zatwierdzenie" data-description="Zarejestruj decyzję właściciela aktywów oraz pozostałe ryzyka wymagające akceptacji lub dalszego planu.">
+          <div class="section-heading">
+            <div>
+              <h3>ZCR 7: zatwierdzenie właściciela aktywów</h3>
+              <p>Zatwierdzenie powinno obejmować zakres, wyniki, ryzyko rezydualne i otwarte działania.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <label class="field">
+              <span>Osoba zatwierdzająca</span>
+              <input type="text" data-bind="approval.approver" placeholder="imię, nazwisko, rola">
+            </label>
+            <label class="field">
+              <span>Data zatwierdzenia</span>
+              <input type="date" data-bind="approval.approvalDate">
+            </label>
+            <label class="field">
+              <span>Decyzja</span>
+              <select data-bind="approval.decision">
+                <option value="Draft">Szkic</option>
+                <option value="Approved">Zatwierdzone</option>
+                <option value="Approved with actions">Zatwierdzone z działaniami</option>
+                <option value="Rejected">Odrzucone</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Następny przegląd</span>
+              <input type="date" data-bind="approval.nextReview">
+            </label>
+          </div>
+          <label class="field">
+            <span>Notatki zatwierdzającego</span>
+            <textarea data-bind="approval.notes" rows="7" placeholder="Warunki akceptacji, wyjątki, ryzyka świadomie zaakceptowane, wymagane działania."></textarea>
+          </label>
+
+          <div id="approvalSummary" class="summary-band"></div>
+        </section>
+
+        <section class="view" id="view-report" data-title="Raport" data-description="Sprawdź kompletność i wygeneruj raport Word DOC lub kopię danych JSON.">
+          <div class="section-heading">
+            <div>
+              <h3>Podgląd eksportu</h3>
+              <p>Raport składa dane projektu, strefy, conduits, scenariusze, pakiet CRA, SBOM, podatności, dowody, checklistę i zatwierdzenie.</p>
+            </div>
+            <button class="primary-button" type="button" id="reportExportDocButton">Eksport DOC</button>
+          </div>
+
+          <div id="reportMetrics" class="metric-grid"></div>
+          <div id="reportPreview" class="report-preview"></div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
