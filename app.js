@@ -13,8 +13,8 @@ const UI_TRANSLATIONS = {
   "Dane projektu": "Project data",
   "Usuń wszystkie dane": "Delete all data",
   "Usuń wszystkie dane tej analizy z przeglądarki": "Delete all data for this analysis from the browser",
-  "Stan będzie zapisany automatycznie. Dane są przechowywane wyłącznie lokalnie w Twojej przeglądarce i nie są wysyłane ani zapisywane na serwerze aplikacji.": "State will be saved automatically. Data is stored only locally in your browser and is not sent to or stored on the application server.",
-  "Dane są przechowywane wyłącznie lokalnie w Twojej przeglądarce i nie są wysyłane ani zapisywane na serwerze aplikacji.": "Data is stored only locally in your browser and is not sent to or stored on the application server.",
+  "Stan będzie zapisany automatycznie. Dane są zapisywane wyłącznie w Twojej lokalnej przeglądarce, nie są wysyłane na serwer i są przetwarzane lokalnie na Twoim urządzeniu.": "State will be saved automatically. Data is stored only in your local browser, is not sent to a server and is processed locally on your device.",
+  "Dane są zapisywane wyłącznie w Twojej lokalnej przeglądarce, nie są wysyłane na serwer i są przetwarzane lokalnie na Twoim urządzeniu.": "Data is stored only in your local browser, is not sent to a server and is processed locally on your device.",
   "Projekt i SUC": "Project and SUC",
   "Strefy i conduits": "Zones and conduits",
   "Scenariusze ryzyka": "Risk scenarios",
@@ -2162,7 +2162,7 @@ function updateCompletion() {
 function updateSaveStatus() {
   const saveStatus = document.getElementById("saveStatus");
   if (!saveStatus) return;
-  const privacyNotice = "Dane są przechowywane wyłącznie lokalnie w Twojej przeglądarce i nie są wysyłane ani zapisywane na serwerze aplikacji.";
+  const privacyNotice = "Dane są zapisywane wyłącznie w Twojej lokalnej przeglądarce, nie są wysyłane na serwer i są przetwarzane lokalnie na Twoim urządzeniu.";
   const status = state.updatedAt
     ? `Ostatni zapis lokalny: ${formatDateTime(state.updatedAt)}. ${privacyNotice}`
     : `Stan będzie zapisany automatycznie. ${privacyNotice}`;
